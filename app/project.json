@@ -10,9 +10,10 @@
     "基线拟合",
     "损失核算",
     "能量对账",
+    "储能仲裁",
     "运行归档"
   ],
-  "rule": "仅用有效对照逆变器和相同辐照区间拟合基线；重叠限电事件先求并集再积分",
+  "rule": "仅用有效对照逆变器和相同辐照区间拟合基线；重叠限电事件先求并集再积分；电池充放量不得计入限发，三量无法互证的片段留待查",
   "lane": "L10",
   "bg": "深青黑",
   "hue": "黄46°",
@@ -29,6 +30,7 @@
     "baseline",
     "loss",
     "reconcile",
+    "storage",
     "archive"
   ],
   "labels": {
@@ -67,6 +69,28 @@
     "unknown_seconds": "未定 s",
     "line": "原始行",
     "_line": "原始行",
-    "detail": "原因"
+    "detail": "原因",
+    "pv_kw": "光伏功率 kW",
+    "pv_kwh": "光伏发电 kWh",
+    "charge_kw": "充电功率 kW",
+    "discharge_kw": "放电功率 kW",
+    "charge_kwh": "电池充电 kWh",
+    "discharge_kwh": "电池放电 kWh",
+    "export_kw": "上网功率 kW",
+    "export_kwh": "上网电量 kWh",
+    "natural_kwh": "自然净出口 kWh",
+    "export_limit_kw": "并网限值 kW",
+    "residual_kwh": "账差 kWh",
+    "grid_curtail_kwh": "并网约束限发 kWh",
+    "claimable_kwh": "可申报损失 kWh",
+    "naive_claim_kwh": "净差法误算 kWh",
+    "battery_impact_kwh": "电池影响 kWh",
+    "battery_action": "电池动作",
+    "battery_source": "电池依据来源",
+    "decision": "认定结论",
+    "basis_revision": "依据版本",
+    "basis_id": "依据编号",
+    "reason_code": "原因码",
+    "review_flag": "待查"
   }
 }

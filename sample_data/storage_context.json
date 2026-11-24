@@ -1,0 +1,25 @@
+{
+  "keys": [
+    "intake",
+    "devices",
+    "slicing",
+    "baseline",
+    "loss",
+    "reconcile",
+    "storage",
+    "archive"
+  ],
+  "devices": {
+    "PV1": {"zone": "北岭", "capacity_kw": "160", "reference": false, "kind": "pv"},
+    "PV2": {"zone": "北岭", "capacity_kw": "120", "reference": false, "kind": "pv"},
+    "REF1": {"zone": "北岭", "capacity_kw": "160", "reference": true, "kind": "pv"},
+    "REF2": {"zone": "北岭", "capacity_kw": "120", "reference": true, "kind": "pv"},
+    "BESS": {"zone": "北岭", "capacity_kw": "100", "reference": false, "kind": "bess"},
+    "POC": {"zone": "并网点", "capacity_kw": "400", "reference": false, "kind": "meter"}
+  },
+  "cadence_seconds": 600,
+  "irradiance_bin": "100",
+  "min_references": 2,
+  "export_limit_kw": "250",
+  "storage_tolerance_kwh": "0.5"
+}

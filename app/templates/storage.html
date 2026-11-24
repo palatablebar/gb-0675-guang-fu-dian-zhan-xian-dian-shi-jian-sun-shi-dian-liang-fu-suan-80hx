@@ -1,0 +1,57 @@
+{% extends 'base.html' %}{% block content %}
+<section class="panel storage-summary">
+  <div class="panel__head"><h2>结算汇总</h2><span>依据版本 r{{ state.storage_segments[0].basis_revision if state.storage_segments else 0 }}</span></div>
+  {% if not state.storage_segments %}
+  <p class="rule-note">本批次设备清单中没有储能电池或并网点表计，储能仲裁不产生片段，不影响光伏侧限发结算。</p>
+  {% endif %}
+  <div class="kpis">
+    <div class="kpi"><small>可申报损失 kWh</small><b class="claimable">{{ state.storage_summary.claimable_kwh }}</b></div>
+    <div class="kpi"><small>电池影响 kWh</small><b class="battery">{{ state.storage_summary.battery_impact_kwh }}</b></div>
+    <div class="kpi"><small>净差法误算 kWh</small><b>{{ state.storage_summary.naive_claim_kwh }}</b></div>
+    <div class="kpi"><small>待查片段</small><b class="review">{{ state.storage_summary.review_segments }}</b></div>
+    <div class="kpi"><small>待查时长 min</small><b>{{ state.storage_summary.review_seconds//60 }}</b></div>
+  </div>
+</section>
+{% if state.storage_segments %}
+<section class="panel basis-panel">
+  <div class="panel__head"><h2>上游充放依据更新</h2><span>只重算受影响片段；同依据重试不新增电量</span></div>
+  <form id="basis-form" class="basis-form">
+    <label>充电功率 kW（负向吸收）<input type="number" step="0.01" name="charge_kw" placeholder="如 40"></label>
+    <label>放电功率 kW（正向释放）<input type="number" step="0.01" name="discharge_kw" placeholder="如 30"></label>
+    <label>并网限值 kW<input type="number" step="0.01" name="export_limit_kw" placeholder="如 120"></label>
+    <label>更新说明<input type="text" name="note" placeholder="上游单据编号（可选）"></label>
+    <button type="submit" id="basis-submit">提交依据</button>
+  </form>
+  <output id="basis-feedback" aria-live="polite"></output>
+  <div class="table-scroll basis-history">
+    <table><thead><tr><th>版本</th><th>依据内容</th><th>说明</th><th>摘要</th></tr></thead>
+    <tbody id="basis-rows"><tr><td colspan="4">读取中…</td></tr></tbody></table>
+  </div>
+</section>
+{% endif %}
+{% if state.storage_segments %}
+<section class="panel main-panel">
+  <div class="panel__head"><h2>逐段三方互证</h2><span>{{ view.rows|length }} 段 · 光伏 / 电池 / 上网</span></div>
+  <div class="table-scroll"><table>
+    <thead><tr>
+      <th>开始 UTC</th><th>时长 s</th><th>光伏 kW</th><th>充电 kW</th><th>放电 kW</th><th>上网 kW</th><th>限值 kW</th><th>电池依据来源</th>
+      <th>光伏发电 kWh</th><th>充电 kWh</th><th>放电 kWh</th><th>上网 kWh</th><th>自然净出口 kWh</th>
+      <th>账差 kWh</th><th>可申报 kWh</th><th>净差误算 kWh</th><th>电池影响 kWh</th><th>认定</th><th>原因码</th><th>依据版本</th>
+    </tr></thead>
+    <tbody>
+    {% for r in view.rows %}
+      <tr class="{{ 'is-review' if r.review_flag else ('is-claim' if r.reason_code=='GRID_CURTAIL' else '') }}">
+        <td>{{ r.start }}</td><td>{{ r.seconds }}</td>
+        {% for col in ['pv_kw','charge_kw','discharge_kw','export_kw','export_limit_kw','pv_kwh','charge_kwh','discharge_kwh','export_kwh','natural_kwh','residual_kwh','claimable_kwh','naive_claim_kwh','battery_impact_kwh'] %}
+        <td>{% if r[col] is none %}<span class="unknown">待查</span>{% else %}{{ '%.4f'|format(r[col]|float) }}{% endif %}</td>
+        {% endfor %}
+        <td>{{ '上游依据' if r.battery_source=='basis' else ('缺测' if r.battery_source=='gap' else '现场遥测') }}</td>
+        <td><b>{{ r.decision }}</b></td><td>{{ r.reason_code }}</td><td>r{{ r.basis_revision }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  <p class="rule-note">规则：电池充放量永不计入限发；净差法把充电当限电、被放电冲减损失，仅作对照。账差超阈或缺测的片段留待查，不并入可申报损失。</p>
+</section>
+{% endif %}
+{% endblock %}

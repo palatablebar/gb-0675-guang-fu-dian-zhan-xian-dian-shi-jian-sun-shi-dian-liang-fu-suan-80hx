@@ -12,7 +12,8 @@
 | M4 基线拟合 | 执行并复核基线拟合 | `POST /api/baseline` | `app/modules/baseline/rules.py` | `tests/test_baseline.py` |
 | M5 损失核算 | 执行并复核损失核算 | `POST /api/loss` | `app/modules/loss/rules.py` | `tests/test_loss.py` |
 | M6 能量对账 | 执行并复核能量对账 | `POST /api/reconcile` | `app/modules/reconcile/rules.py` | `tests/test_reconcile.py` |
-| M7 运行归档 | 执行并复核运行归档 | `POST /api/archive` | `app/modules/archive/rules.py` | `tests/test_archive.py` |
+| M7 储能仲裁 | 三方互证并提交充放依据 | `POST /api/storage`、`POST /api/runs/{id}/basis` | `app/modules/storage/rules.py`、`app/basis.py` | `tests/test_storage.py`、`tests/test_e2e.py` |
+| M8 运行归档 | 执行并复核运行归档 | `POST /api/archive` | `app/modules/archive/rules.py` | `tests/test_archive.py` |
 
 ## 陷阱登记
 
@@ -29,6 +30,12 @@
 | TRAP-06 | 全角千分位 | 静默错算或证据丢失 | 以可复核规则显式处理 | `app/modules/devices/rules.py` | `tests/test_devices.py::test_fullwidth_number` |
 | TRAP-11 | UTC归一 | 静默错算或证据丢失 | 以可复核规则显式处理 | `app/modules/devices/rules.py` | `tests/test_devices.py::test_time_equivalence` |
 | TRAP-23 | 限电区间并集 | 静默错算或证据丢失 | 以可复核规则显式处理 | `app/modules/slicing/rules.py` | `tests/test_slicing.py::test_overlapping_real` |
+| TRAP-31 | 充电被净差法当限电 | 把电池吸收电量计入限发 | 自然净出口剔除充电，电池充放永不进限发，净差法仅对照 | `app/modules/storage/rules.py` | `tests/test_storage.py::test_charge_never_counted_as_curtailment` |
+| TRAP-32 | 放电冲掉真实限发 | 净出口被托高后损失归零 | 按自然净出口对限值的约束缺口认定，放电不冲减 | `app/modules/storage/rules.py` | `tests/test_storage.py::test_discharge_does_not_offset_real_curtailment` |
+| TRAP-33 | 只看光伏侧忽略并网约束 | 约束解除后账差被误填 0 | 约束未生效且账差超阈即 BALANCE_FAIL 待查 | `app/modules/storage/rules.py` | `tests/test_storage.py::test_six_segment_decisions` |
+| TRAP-34 | 三量缺测静默外推 | 用相邻样本填补缺口 | 缺测片段 DATA_GAP 留待查，超节奏缺口另立片段 | `app/modules/storage/rules.py` | `tests/test_storage.py::test_data_gap_segment` |
+| TRAP-35 | 依据重试重复记账 | 同一上游单据生成多版电量 | 依据内容哈希幂等，重试不新增版本 | `app/basis.py` | `tests/test_storage.py::test_basis_retry_is_idempotent` |
+| TRAP-36 | 依据切换失败污染现场 | 非法依据覆盖旧版结果 | 事务内校验，失败回滚，旧版依据与凭据保留 | `app/basis.py` | `tests/test_storage.py::test_basis_validation_failure_keeps_old_version` |
 
 ## 对账规则
 

@@ -6,6 +6,7 @@
     "baseline",
     "loss",
     "reconcile",
+    "storage",
     "archive"
   ],
   "devices": {
